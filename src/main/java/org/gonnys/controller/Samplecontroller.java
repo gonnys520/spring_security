@@ -26,4 +26,9 @@ public class Samplecontroller {
 	public void doAdmin() {
 		log.info("do admin.........................");
 	}
+	
+	@GetMapping("/register")
+	public void register() {
+		log.info("register......................!!");
+	}
 }

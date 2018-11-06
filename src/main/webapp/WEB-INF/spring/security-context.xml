@@ -2,42 +2,47 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:security="http://www.springframework.org/schema/security"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-<bean id="loginHandler" class="org.gonnys.security.CustomLoginSuccessHandler"></bean>
+	<bean id="loginHandler"
+		class="org.gonnys.security.CustomLoginSuccessHandler"></bean>
+		
+	<bean id="bcryptEncoder"
+	 class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder">
+	 </bean>
+
+	<bean id="customUserService" class="org.gonnys.security.CustomUserDetailsService"></bean>
 
 	<security:http>
 
-		<security:intercept-url pattern="/sample/all"
-			access="permitAll" />
-		<security:intercept-url
-			pattern="/sample/member" access="hasRole('ROLE_MEMBER')" />
-		<security:intercept-url pattern="/sample/admin"
-			access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url pattern="/sample/all" access="permitAll" />
+		<security:intercept-url pattern="/sample/member" access="hasRole('ROLE_MEMBER')" />
+		<security:intercept-url pattern="/sample/admin" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url pattern="/sample/register" access="isAuthenticated()" />
 
-		<security:access-denied-handler
-			error-page="/accessError" />
-			
-			
+		<security:access-denied-handler error-page="/accessError" />
+
+
 		<security:form-login login-page="/customLogin"
-		authentication-success-handler-ref="loginHandler"
-		authentication-failure-handler-ref="loginHandler"/>
+			authentication-success-handler-ref="loginHandler"
+			authentication-failure-handler-ref="loginHandler" />
+
+		<security:logout logout-url="/customLogout" />
 		
-		<security:logout logout-url="/customLogout"/>
-		
-		
+		<security:remember-me
+		data-source-ref="dataSource" token-validity-seconds="605800"
+		/>
+
+
 	</security:http>
 
 	<security:authentication-manager>
-		<security:authentication-provider>
-			<security:user-service>
-				<security:user name="member" password="{noop}member"
-					authorities="ROLE_MEMBER" />
-				<security:user name="admin" password="{noop}admin"
-					authorities="ROLE_MEMBER, ROLE_ADMIN" />
-			</security:user-service>
+		<security:authentication-provider user-service-ref="customUserService">
+			<security:password-encoder ref="bcryptEncoder"></security:password-encoder>
+	
 		</security:authentication-provider>
 	</security:authentication-manager>
+	
 
 </beans>
